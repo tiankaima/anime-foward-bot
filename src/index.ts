@@ -279,7 +279,7 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
 		}
 	}
 
-	return new Response('not implemented', { status: 501 });
+	return new Response('not implemented');
 }
 
 async function fowardJob(env: Env): Promise<Response> {
