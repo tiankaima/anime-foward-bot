@@ -72,10 +72,10 @@ async function unsetWebhook(request: Request, env: Env, ctx: ExecutionContext): 
 }
 
 async function handleMessageText(env: Env, chatId: string, text: string): Promise<void> {
-	// /addRegexRule <regex>
-	// /addKeywordRule <keyword1> <keyword2> ...
-	// /listRules
-	// /removeRule <id>
+	// /add_regex_rule <regex>
+	// /add_keyword_rule <keyword1> <keyword2> ...
+	// /list_rules
+	// /remove_rule <id>
 
 	const bot = new TelegramAPI({ botToken: env.ENV_BOT_TOKEN });
 	const rulestorage = (await env.DATA.get('rules').then((r) => (r ? JSON.parse(r) : { data: {} }))) as RuleStorage;
@@ -92,7 +92,7 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 	const command = parts[0];
 	const args = parts.slice(1);
 
-	if (command === '/addRegexRule') {
+	if (command === '/add_regex_rule') {
 		const regex = args.join(' ');
 		const rule: Rule = {
 			id: Math.floor(Math.random() * 1000000),
@@ -112,7 +112,7 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 		return;
 	}
 
-	if (command === '/addKeywordRule') {
+	if (command === '/add_keyword_rule') {
 		const keywords = args;
 		const rule: Rule = {
 			id: Math.floor(Math.random() * 1000000),
@@ -132,7 +132,7 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 		return;
 	}
 
-	if (command === '/listRules') {
+	if (command === '/list_rules') {
 		const rules = rulestorage.data[chatId] || [];
 		const message = rules.map((rule) => {
 			if (rule.useRegex) {
@@ -150,7 +150,7 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 		return;
 	}
 
-	if (command === '/removeRule') {
+	if (command === '/remove_rule') {
 		const id = parseInt(args[0], 10);
 		const rules = rulestorage.data[chatId] || [];
 		const newRules = rules.filter((rule) => rule.id !== id);
@@ -227,8 +227,8 @@ async function fowardJob(env: Env): Promise<Response> {
 }
 
 export default {
-	async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
-		return fowardJob(env);
+	async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+		await fowardJob(env);
 	},
 
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
