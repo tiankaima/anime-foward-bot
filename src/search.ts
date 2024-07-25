@@ -19,7 +19,7 @@ export async function fetchRecentPosts(page: number, not_before?: number | null)
 	}
 
 	if (not_before == null) {
-		not_before = Date.now() / 1000 - 24 * 60 * 60;
+		not_before = Date.now() / 1000 - 24 * 60 * 60 * 7;
 	}
 
 	const url = new URL(`https://search.acgn.es/api/?cid=1&page=${page}&limit=24&word=*&sort=time&file_suffix=`);
