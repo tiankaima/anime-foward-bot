@@ -30,6 +30,10 @@ function matchRule(rule: Rule, text: string): boolean {
 	return false;
 }
 
+function matchRules(rules: Rule[], text: string): boolean {
+	return rules.some((rule) => matchRule(rule, text));
+}
+
 async function setWebhook(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 	// auth
 	const url = new URL(request.url);
@@ -77,7 +81,7 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 	const rulestorage = (await env.DATA.get('rules').then((r) => (r ? JSON.parse(r) : { data: {} }))) as RuleStorage;
 
 	const parts = text.split(' ');
-	if (parts.length < 2) {
+	if ((parts.length < 2 && !parts[0].startsWith('/')) || parts[0].charAt(0) !== '/') {
 		await bot.sendMessage({
 			chatId,
 			text: 'invalid command',
@@ -206,14 +210,13 @@ async function fowardJob(env: Env): Promise<Response> {
 	const data = await fetchRecentPosts(0, lastUpdatedNumber);
 
 	for (const post of data) {
-		for (const [chatId, rules] of Object.entries(rulestorage.data)) {
-			for (const rule of rules) {
-				if (matchRule(rule, post.text)) {
-					bot.sendMessage({
-						chatId,
-						text: post.link,
-					});
-				}
+		for (const chatId in rulestorage.data) {
+			const rules = rulestorage.data[chatId];
+			if (matchRules(rules, post.text)) {
+				await bot.sendMessage({
+					chatId,
+					text: post.link,
+				});
 			}
 		}
 	}
