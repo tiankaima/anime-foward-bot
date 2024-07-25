@@ -79,10 +79,13 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 	// /fetch_now <length=%d(default 7)>
 
 	const bot = new TelegramAPI({ botToken: env.ENV_BOT_TOKEN });
-	const rulestorage = (await env.DATA.get('rules').then((r) => (r ? JSON.parse(r) : { data: {} }))) as RuleStorage;
 
 	const parts = text.split(' ');
-	if ((parts.length < 2 && !parts[0].startsWith('/')) || parts[0].charAt(0) !== '/') {
+	if (
+		parts.length == 0 ||
+		(parts.length < 2 && !['/list_rules', '/fetch_now', '/start', '/help'].includes(parts[0])) ||
+		parts[0][0] !== '/'
+	) {
 		await bot.sendMessage({
 			chatId,
 			text: 'invalid command',
@@ -95,6 +98,29 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 		command = command.split('@')[0];
 	}
 	const args = parts.slice(1);
+
+	if (command === '/start') {
+		await bot.sendMessage({
+			chatId,
+			text: 'welcome! use /help to get help',
+		});
+		return;
+	}
+
+	if (command === '/help') {
+		await bot.sendMessage({
+			chatId,
+			text: `
+/add_regex_rule <regex>
+/add_keyword_rule <keyword1> <keyword2> ...
+/list_rules
+/remove_rule <id>
+/fetch_now <length=%d(default 7)>`,
+		});
+		return;
+	}
+
+	const rulestorage = (await env.DATA.get('rules').then((r) => (r ? JSON.parse(r) : { data: {} }))) as RuleStorage;
 
 	if (command === '/add_regex_rule') {
 		const regex = args.join(' ').trim();
@@ -303,6 +329,7 @@ export default {
 		if (path === '/fowardJob') {
 			return fowardJob(env);
 		}
+
 		return new Response('not found', { status: 404 });
 	},
 };

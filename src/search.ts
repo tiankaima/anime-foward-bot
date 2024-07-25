@@ -13,12 +13,12 @@ export interface Post {
 	date: number;
 }
 
-export async function fetchRecentPosts(page: number, not_before?: number | null): Promise<Post[]> {
-	if (page < 0 || page > 10) {
+export async function fetchRecentPosts(page: number, not_before: number | null = null): Promise<Post[]> {
+	// upstream limit
+	if (page < 0 || page >= 20) {
 		return [];
 	}
-
-	if (not_before == null) {
+	if (not_before === null) {
 		not_before = Date.now() / 1000 - 24 * 60 * 60 * 7;
 	}
 
@@ -32,8 +32,13 @@ export async function fetchRecentPosts(page: number, not_before?: number | null)
 	const firstPostTime = data.map((post: Post) => post.date).reduce((a: number, b: number) => Math.min(a, b));
 
 	if (firstPostTime > not_before) {
-		const nextData = await fetchRecentPosts(page + 1, not_before);
-		return data.concat(nextData);
+		try {
+			const nextData = await fetchRecentPosts(page + 1, not_before);
+			return data.concat(nextData);
+		} catch (e) {
+			console.error(e);
+			return data;
+		}
 	}
 
 	// filter out posts that are older than not_before
