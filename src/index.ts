@@ -161,6 +161,9 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 			}
 			return `#\`${rule.id}\` (invalid)`;
 		});
+		if (message.length === 0) {
+			message.push('no rules found');
+		}
 		await bot.sendMessage({
 			chatId,
 			text: message.join('\n'),
