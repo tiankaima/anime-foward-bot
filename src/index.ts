@@ -93,7 +93,16 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 	const args = parts.slice(1);
 
 	if (command === '/add_regex_rule') {
-		const regex = args.join(' ');
+		const regex = args.join(' ').trim();
+
+		if (regex === '') {
+			await bot.sendMessage({
+				chatId,
+				text: 'invalid regex',
+			});
+			return;
+		}
+
 		const rule: Rule = {
 			id: Math.floor(Math.random() * 1000000),
 			useRegex: true,
@@ -114,6 +123,15 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 
 	if (command === '/add_keyword_rule') {
 		const keywords = args;
+
+		if (keywords.length === 0) {
+			await bot.sendMessage({
+				chatId,
+				text: 'invalid keywords',
+			});
+			return;
+		}
+
 		const rule: Rule = {
 			id: Math.floor(Math.random() * 1000000),
 			useRegex: false,
@@ -152,6 +170,15 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 
 	if (command === '/remove_rule') {
 		const id = parseInt(args[0], 10);
+
+		if (isNaN(id)) {
+			await bot.sendMessage({
+				chatId,
+				text: 'invalid id',
+			});
+			return;
+		}
+
 		const rules = rulestorage.data[chatId] || [];
 		const newRules = rules.filter((rule) => rule.id !== id);
 		rulestorage.data[chatId] = newRules;
