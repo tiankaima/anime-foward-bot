@@ -263,7 +263,7 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
 
 	const body = await request.json();
 
-	// console.log(JSON.stringify(body, null, 2));
+	console.log(JSON.stringify(body, null, 2));
 	// const bot = new TelegramAPI({ botToken: env.ENV_BOT_TOKEN });
 	// bot.fowardMessage({
 	// 	chatId: env.ENV_BOT_ADMIN_CHAT_ID,
