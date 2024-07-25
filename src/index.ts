@@ -76,6 +76,7 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 	// /add_keyword_rule <keyword1> <keyword2> ...
 	// /list_rules
 	// /remove_rule <id>
+	// /fetch_now <length=%d(default 7)>
 
 	const bot = new TelegramAPI({ botToken: env.ENV_BOT_TOKEN });
 	const rulestorage = (await env.DATA.get('rules').then((r) => (r ? JSON.parse(r) : { data: {} }))) as RuleStorage;
@@ -193,6 +194,34 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 		return;
 	}
 
+	if (command === '/fetch_now') {
+		const rules = rulestorage.data[chatId] || [];
+		if (rules.length === 0) {
+			await bot.sendMessage({
+				chatId,
+				text: 'no rules found',
+			});
+			return;
+		}
+
+		const length = parseInt(args[0], 10) || 7;
+		const date_limit = Date.now() / 1000 - 24 * 60 * 60 * length;
+		const data = await fetchRecentPosts(0, date_limit);
+
+		for (const post of data) {
+			for (const rule of rules) {
+				if (matchRule(rule, post.text)) {
+					await bot.sendMessage({
+						chatId,
+						text: post.link,
+					});
+				}
+				break;
+			}
+		}
+		return;
+	}
+
 	await bot.sendMessage({
 		chatId,
 		text: 'invalid command',
@@ -247,6 +276,7 @@ async function fowardJob(env: Env): Promise<Response> {
 					chatId,
 					text: post.link,
 				});
+				break;
 			}
 		}
 	}
