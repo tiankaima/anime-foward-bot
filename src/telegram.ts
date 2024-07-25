@@ -25,25 +25,37 @@ export class TelegramAPI {
 		return JSON.stringify(r);
 	}
 
-	async sendMessage({ chatId, text }: { chatId: string; text: string }): Promise<string> {
+	async sendMessage({ chatId, text, notify = true }: { chatId: string; text: string; notify?: boolean }): Promise<string> {
 		const url = this.apiUrl({
 			methodName: 'sendMessage',
 			params: {
 				chat_id: chatId,
 				text,
+				disable_notification: !notify,
 			},
 		});
 		const r = await fetch(url).then((res) => res.json());
 		return JSON.stringify(r);
 	}
 
-	async fowardMessage({ chatId, fromChatId, messageId }: { chatId: string; fromChatId: string; messageId: string }): Promise<string> {
+	async fowardMessage({
+		chatId,
+		fromChatId,
+		messageId,
+		notify = true,
+	}: {
+		chatId: string;
+		fromChatId: string;
+		messageId: string;
+		notify?: boolean;
+	}): Promise<string> {
 		const url = this.apiUrl({
 			methodName: 'forwardMessage',
 			params: {
 				chat_id: chatId,
 				from_chat_id: fromChatId,
 				message_id: messageId,
+				disable_notification: !notify,
 			},
 		});
 		const r = await fetch(url).then((res) => res.json());
