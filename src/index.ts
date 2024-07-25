@@ -154,12 +154,12 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 		const rules = rulestorage.data[chatId] || [];
 		const message = rules.map((rule) => {
 			if (rule.useRegex) {
-				return `#${rule.id} (regex): ${rule.regex}`;
+				return `#\`${rule.id}\` (regex): ${rule.regex}`;
 			}
 			if (rule.keywords) {
-				return `#${rule.id} (keywords): ${rule.keywords.join(', ')}`;
+				return `#\`${rule.id}\` (keywords): ${rule.keywords.join(', ')}`;
 			}
-			return `#${rule.id} (invalid)`;
+			return `#\`${rule.id}\` (invalid)`;
 		});
 		await bot.sendMessage({
 			chatId,
