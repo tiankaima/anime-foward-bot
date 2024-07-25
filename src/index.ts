@@ -80,7 +80,7 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 
 	const bot = new TelegramAPI({ botToken: env.ENV_BOT_TOKEN });
 
-	const parts = text.split(' ');
+	const parts = text.split(/(?:,| )+/) || [];
 	if (
 		parts.length == 0 ||
 		(parts.length < 2 && !['/list_rules', '/fetch_now', '/start', '/help'].includes(parts[0])) ||
