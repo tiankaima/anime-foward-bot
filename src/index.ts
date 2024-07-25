@@ -283,16 +283,20 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
 }
 
 async function fowardJob(env: Env): Promise<Response> {
-	const rulestorage = (await env.DATA.get('rules').then((r) => (r ? JSON.parse(r) : { data: {} }))) as RuleStorage;
-	if (!rulestorage.data) {
-		return new Response('no rules found', { status: 404 });
-	}
-
 	const bot = new TelegramAPI({ botToken: env.ENV_BOT_TOKEN });
 	const lastUpdated = await env.DATA.get('lastUpdated');
 	// string | null -> number | null
 	const lastUpdatedNumber = lastUpdated ? parseInt(lastUpdated, 10) : null;
 	const data = await fetchRecentPosts(0, lastUpdatedNumber);
+
+	if (data.length === 0) {
+		return new Response('no new posts found', { status: 404 });
+	}
+
+	const rulestorage = (await env.DATA.get('rules').then((r) => (r ? JSON.parse(r) : { data: {} }))) as RuleStorage;
+	if (!rulestorage.data) {
+		return new Response('no rules found', { status: 404 });
+	}
 
 	for (const post of data) {
 		for (const chatId in rulestorage.data) {
