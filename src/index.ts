@@ -90,7 +90,10 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 		return;
 	}
 
-	const command = parts[0];
+	let command = parts[0];
+	if (command.includes('@')) {
+		command = command.split('@')[0];
+	}
 	const args = parts.slice(1);
 
 	if (command === '/add_regex_rule') {
@@ -209,14 +212,11 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 		const data = await fetchRecentPosts(0, date_limit);
 
 		for (const post of data) {
-			for (const rule of rules) {
-				if (matchRule(rule, post.text)) {
-					await bot.sendMessage({
-						chatId,
-						text: post.link,
-					});
-				}
-				break;
+			if (matchRules(rules, post.text)) {
+				await bot.sendMessage({
+					chatId,
+					text: post.link,
+				});
 			}
 		}
 		return;
@@ -270,13 +270,11 @@ async function fowardJob(env: Env): Promise<Response> {
 
 	for (const post of data) {
 		for (const chatId in rulestorage.data) {
-			const rules = rulestorage.data[chatId];
-			if (matchRules(rules, post.text)) {
+			if (matchRules(rulestorage.data[chatId], post.text)) {
 				await bot.sendMessage({
 					chatId,
 					text: post.link,
 				});
-				break;
 			}
 		}
 	}
