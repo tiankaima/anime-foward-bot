@@ -86,10 +86,7 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 		(parts.length < 2 && !['/list_rules', '/fetch_now', '/start', '/help'].includes(parts[0])) ||
 		parts[0][0] !== '/'
 	) {
-		await bot.sendMessage({
-			chatId,
-			text: 'invalid command',
-		});
+		console.error('invalid command');
 		return;
 	}
 
