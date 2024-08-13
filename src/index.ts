@@ -80,20 +80,28 @@ async function handleMessageText(env: Env, chatId: string, text: string): Promis
 
 	const bot = new TelegramAPI({ botToken: env.ENV_BOT_TOKEN });
 
-	const parts = text.split(/(?:,| )+/) || [];
-	if (
-		parts.length == 0 ||
-		(parts.length < 2 && !['/list_rules', '/fetch_now', '/start', '/help'].includes(parts[0])) ||
-		parts[0][0] !== '/'
-	) {
+	let parts = text.split(/(?:,| )+/) || [];
+	if (parts.length === 0) {
 		console.error('invalid command');
 		return;
 	}
 
-	let command = parts[0];
-	if (command.includes('@')) {
-		command = command.split('@')[0];
+	if (parts.length === 1) {
+		if (parts[0].includes('@')) {
+			parts[0] = parts[0].split('@')[0];
+		}
+		if (!['/list_rules', '/fetch_now', '/start', '/help'].includes(parts[0])) {
+			console.error('invalid command');
+			return;
+		}
 	}
+
+	if (!parts[0].startsWith('/')) {
+		console.error('invalid command');
+		return;
+	}
+
+	const command = parts[0];
 	const args = parts.slice(1);
 
 	if (command === '/start') {
